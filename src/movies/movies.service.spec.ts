@@ -11,13 +11,19 @@ describe('MoviesService', () => {
     }).compile();
 
     service = module.get<MoviesService>(MoviesService);
+
+    // 추가를 각 테스트에서 하지 않고, beforeEach에서 미리 해둘 수 있다.
+    // service.createMovie({
+    //   title: 'Test Movie',
+    //   genres: ['test'],
+    //   year: 2000,
+    // });
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  // 배열을 리턴하는지 안하는지 테스트
   describe("getAll", () => {
     it("should return an array", () => {
       const result = service.getAll();
@@ -25,7 +31,6 @@ describe('MoviesService', () => {
     })
   });
 
-  // test 를 위해 하나 생성하는것도 테스트에 포함
   describe("getOne", ()=>{
     it("should return a movie", () => {
       service.createMovie({
@@ -35,15 +40,65 @@ describe('MoviesService', () => {
       });
       const movie = service.getOne(1);
       expect(movie).toBeDefined();
-      expect(movie.id).toEqual(1);
     });
     it("should throw 404 error", () => {
       try{
         service.getOne(999);
       }catch(e){
         expect(e).toBeInstanceOf(NotFoundException);
-        expect(e.message).toEqual("Movie with Id:999 not found.")
       }
     })
+  });
+
+  describe("deleteOne", () =>{
+    it("delete a movie", () =>{
+      service.createMovie({
+        title: 'Test Movie',
+        genres: ['test'],
+        year: 2000,
+      });
+      const beforeDelete = service.getAll().length;
+      service.deleteOne(1);
+      const afterDelete = service.getAll().length;
+      expect(afterDelete).toBeLessThan(beforeDelete);
+    });
+
+    it("should return a 404", ()=>{
+      try{
+        service.deleteOne(999);
+      }catch(e){
+        expect(e).toBeInstanceOf(NotFoundException);
+      }
+    });
+  });
+
+  describe("createMovie", ()=>{
+    it("should create movie", ()=>{
+      const beforeCreate = service.getAll().length;
+
+      service.createMovie({
+        title: 'Test Movie',
+        genres: ['test'],
+        year: 2000,
+      });
+
+      const afterCreate = service.getAll().length;
+      expect(afterCreate).toBeGreaterThan(beforeCreate);
+    })
+  })
+
+  describe("update", ()=>{
+    it("should update a movie", () =>{
+
+      service.createMovie({
+        title: 'Test Movie',
+        genres: ['test'],
+        year: 2000,
+      });
+
+      service.update(1, {title: 'Update Test'});
+      const movie = service.getOne(1);
+      expect(movie.title).toEqual('Update Test');
+    });
   });
 });
