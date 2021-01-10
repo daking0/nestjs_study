@@ -25,6 +25,7 @@ describe('MoviesService', () => {
     })
   });
 
+  // test 를 위해 하나 생성하는것도 테스트에 포함
   describe("getOne", ()=>{
     it("should return a movie", () => {
       service.createMovie({
